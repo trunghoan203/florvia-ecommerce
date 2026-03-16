@@ -55,6 +55,6 @@ public class AuthService {
                 user.getRole()
         );
 
-        return new LoginResponse(token, user.getEmail());
+        return new LoginResponse(token, "Bearer");
     }
 }
