@@ -14,11 +14,33 @@ spring:
     hibernate:
       ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
 
-    jackson:
+    Jackson:
       time-zone: Asia/Ho_Chi_Minh
 
-springdoc:
+    mail:
+      host: smtp.gmail.com
+      port: 587
+      username: ${MAIL_USERNAME}
+      password: ${MAIL_PASSWORD}
+      properties:
+        mail:
+          SMTP:
+            auth: true
+            STARTTLS:
+              enable: true
+    cache:
+      type: redis
+    data:
+      redis:
+        host: ${REDIS_HOST}
+        port: 6379
+
+spring doc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
@@ -31,3 +53,8 @@ logging:
     root: INFO
     com.florvia.ecommerce: DEBUG
     org.springframework.security: INFO
+
+Cloudinary:
+  cloud-name: ${CLOUDINARY_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}

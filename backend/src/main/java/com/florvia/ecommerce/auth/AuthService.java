@@ -3,6 +3,7 @@ package com.florvia.ecommerce.auth;
 import com.florvia.ecommerce.auth.dto.LoginRequest;
 import com.florvia.ecommerce.auth.dto.LoginResponse;
 import com.florvia.ecommerce.auth.dto.RegisterRequest;
+import com.florvia.ecommerce.entity.Role;
 import com.florvia.ecommerce.entity.User;
 import com.florvia.ecommerce.exception.BadRequestException;
 import com.florvia.ecommerce.repository.UserRepository;
@@ -32,7 +33,7 @@ public class AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFullName(request.getFullName());
-        user.setRole("ROLE_USER");
+        user.setRole(Role.USER);
 
         userRepository.save(user);
     }

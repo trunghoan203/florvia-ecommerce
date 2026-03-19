@@ -1,4 +1,4 @@
-package com.florvia.ecommerce.dto;
+package com.florvia.ecommerce.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

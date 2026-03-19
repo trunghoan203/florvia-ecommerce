@@ -1,5 +1,6 @@
 package com.florvia.ecommerce.entity;
 
+import com.florvia.ecommerce.entity.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,7 +10,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class User {
+@Getter @Setter
+public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,5 +24,6 @@ public class User {
 
     private String fullName;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 }

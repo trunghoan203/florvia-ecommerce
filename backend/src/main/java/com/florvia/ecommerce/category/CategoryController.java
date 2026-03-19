@@ -3,36 +3,30 @@ package com.florvia.ecommerce.category;
 import com.florvia.ecommerce.category.dto.CategoryResponse;
 import com.florvia.ecommerce.category.dto.CreateCategoryRequest;
 import com.florvia.ecommerce.common.ApiResponse;
+import com.florvia.ecommerce.common.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/categories")
+@RequestMapping("/api/categories")
 @RequiredArgsConstructor
 public class CategoryController {
 
     private final CategoryService categoryService;
 
-    // PUBLIC
     @GetMapping
-    public ApiResponse<List<CategoryResponse>> getAll() {
-        return ApiResponse.success(
-                "Get categories success",
-                categoryService.getAll()
-        );
+    public ApiResponse<PageResponse<CategoryResponse>> getAll(
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ApiResponse.success("Fetch categories successfully", categoryService.getAll(pageable));
     }
 
-    // ADMIN
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ApiResponse<Void> create(
-            @Valid @RequestBody CreateCategoryRequest request) {
-
+    public ApiResponse<Void> create(@Valid @RequestBody CreateCategoryRequest request) {
         categoryService.create(request);
-        return ApiResponse.success("Create category success", null);
+        return ApiResponse.success("Category created successfully", null);
     }
 }

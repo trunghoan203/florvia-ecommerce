@@ -1,64 +1,57 @@
 package com.florvia.ecommerce.exception;
 
-import com.florvia.ecommerce.common.ErrorResponse;
+import com.florvia.ecommerce.common.ApiResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFound(ResourceNotFoundException ex) {
-        return new ErrorResponse(
-                false,
-                ex.getMessage(),
-                "RESOURCE_NOT_FOUND",
-                LocalDateTime.now()
-        );
-    }
-
-    @ExceptionHandler(BadRequestException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBadRequest(BadRequestException ex) {
-        return new ErrorResponse(
-                false,
-                ex.getMessage(),
-                "BAD_REQUEST",
-                LocalDateTime.now()
-        );
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidation(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult()
-                .getFieldErrors()
-                .get(0)
-                .getDefaultMessage();
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage()));
 
-        return new ErrorResponse(
-                false,
-                message,
-                "VALIDATION_ERROR",
-                LocalDateTime.now()
-        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.<Map<String, String>>builder()
+                        .success(false)
+                        .message("Invalid data!")
+                        .data(errors)
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
+
+    @ExceptionHandler({ResourceNotFoundException.class, BadRequestException.class})
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleGeneral(Exception ex) {
-        log.error("Unexpected error", ex);
-        return new ErrorResponse(
-                false,
-                "Internal server error",
-                "INTERNAL_ERROR",
-                LocalDateTime.now()
-        );
+    public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception ex) {
+        log.error("Error: ", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Please try again later!"));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ApiResponse<Void> handleValidationErrors(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+        return ApiResponse.error(message);
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ApiResponse<Void> handleOptimisticLockingFailure(ObjectOptimisticLockingFailureException ex) {
+        return ApiResponse.error("The product information was updated by another process. Please try again.");
     }
 }
